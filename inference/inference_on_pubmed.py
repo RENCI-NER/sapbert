@@ -54,7 +54,8 @@ with open(PUBMED_FILE) as f:
         text = data['text']
         id = data['_id']
         mesh_ids = []
-        mesh_ids.append(mention['mesh_id']) for mention in data['mentions']
+        for mention in data['mentions']:
+            mesh_ids.append(mention['mesh_id'])
         mesh_id = '|'.join(mesh_ids)
         pubmed_pairs.append((text, id, mesh_id))
 
