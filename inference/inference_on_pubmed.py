@@ -53,7 +53,9 @@ with open(PUBMED_FILE) as f:
         data = json.loads(line)
         text = data['text']
         id = data['_id']
-        mesh_id = data['mesh_id']
+        mesh_ids = []
+        mesh_ids.append(mention['mesh_id']) for mention in data['mentions']
+        mesh_id = '|'.join(mesh_ids)
         pubmed_pairs.append((text, id, mesh_id))
 
 if not pubmed_pairs:
