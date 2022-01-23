@@ -14,12 +14,8 @@ from scipy.spatial.distance import cdist
 MESH_FILE_PATH = '../data/mesh_desc_2022.xml'
 mesh = MESH(MESH_FILE_PATH)
 mesh.load_mesh()
-all_names = mesh.names
+all_names = [name.strip('\n') for name in mesh.names]
 all_ids = mesh.ids
-
-print(len(all_names), len(all_ids))
-print(all_names[:10])
-print(all_ids[:10])
 
 # load sapbert
 tokenizer = AutoTokenizer.from_pretrained("/projects/ner/software/sapbert/SapBERT-from-PubMedBERT-fulltext")
@@ -43,7 +39,6 @@ for i in tqdm(np.arange(0, len(all_names), bs)):
 
     all_reps.append(cls_rep.cpu().detach().numpy())
 all_reps_emb = np.concatenate(all_reps, axis=0)
-print (all_reps_emb.shape)
 
 # do inference with pubmed data
 PUBMED_FILE = '/projects/ner/datasets/pubmed_ds/split_11.txt'
@@ -64,19 +59,17 @@ if not pubmed_pairs:
     exit(1)
 
 print(f'total data elements: {len(pubmed_pairs)}', flush=True)
-print(pubmed_pairs[:10])
 
 all_pubmed_text = [p[0] for p in pubmed_pairs]
 all_pubmed_ids = [p[1] for p in pubmed_pairs]
 all_pubmed_mesh_ids = [p[2] for p in pubmed_pairs]
 
-print(all_pubmed_text[:10])
-print(all_pubmed_ids[:10])
-print(all_pubmed_mesh_ids[:10])
-
+print(len(all_pubmed_text), len(all_pubmed_ids), len(all_pubmed_mesh_ids))
+print(len(all_names), len(all_ids))
+print (f'all_reps_emb shape: {all_reps_emb.shape}')
 df_data = []
-for i in tqdm(np.arange(0, len(all_pubmed_text), bs)):
-    toks = tokenizer.batch_encode_plus(all_pubmed_text[i:i+bs],
+for i in tqdm(len(all_pubmed_text)):
+    toks = tokenizer.batch_encode_plus([all_pubmed_text[i]],
                                        padding="max_length", 
                                        max_length=25, 
                                        truncation=True,
