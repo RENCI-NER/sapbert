@@ -68,7 +68,7 @@ print(len(all_pubmed_text), len(all_pubmed_ids), len(all_pubmed_mesh_ids))
 print(len(all_names), len(all_ids))
 print (f'all_reps_emb shape: {all_reps_emb.shape}')
 df_data = []
-for i in tqdm(len(all_pubmed_text)):
+for i in tqdm(range(len(all_pubmed_text))):
     toks = tokenizer.batch_encode_plus([all_pubmed_text[i]],
                                        padding="max_length", 
                                        max_length=25, 
