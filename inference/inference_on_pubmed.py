@@ -82,4 +82,4 @@ for i in tqdm(range(len(all_pubmed_text))):
 
 df = pd.DataFrame(df_data, columns = ['Labelled ID', 'Labelled MESH ID',
                                       'Predicted MESH term', 'Predicted MESH ID'])
-df.to_csv('../data/pubmed_split_11_prediction_output.csv')
+df.to_csv('../data/pubmed_split_11_prediction_output.csv', index=False)
