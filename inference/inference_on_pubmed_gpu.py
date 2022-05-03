@@ -85,8 +85,11 @@ if __name__ == '__main__':
                                            max_length=25,
                                            truncation=True,
                                            return_tensors="pt")
-        output = model(**toks)
-        cls_rep = output[0][:,0,:]
+        toks_cuda = {}
+        for k, v in toks.items():
+            toks_cuda[k] = v.cuda(0)
+        output = model(**toks_cuda)
+        cls_rep = output[0][:, 0, :]
         dist = cdist(cls_rep.cpu().detach().numpy(), all_reps_emb)
         nn_index = np.argmin(dist)
         df_data.append([all_pubmed_ids[i], all_pubmed_mesh_ids[i], all_names[nn_index], all_ids[nn_index]])
