@@ -22,10 +22,16 @@ if __name__ == '__main__':
 
     df = pd.read_csv(input_file, usecols=[column_1_name, column_2_name], dtype=str)
     if list_comarison:
-        df['Prediction_agreement'] = df.apply(lambda x: x['Predicted MESH ID'] in x['Labelled MESH ID'], axis=1)
+        df['Prediction_agreement'] = df.apply(lambda x: x[column_2_name] in x[column_1_name], axis=1)
     else:
         df['Prediction_agreement'] = df.apply(lambda x: x[column_1_name] == x[column_2_name], axis=1)
 
     agree_df = df[df.Prediction_agreement == True]
     disagree_df = df[df.Prediction_agreement == False]
+    if not list_comarison:
+        # get percentage of empty column_1_name and column_2_name
+        col_1_null = df[column_1_name].isna()
+        col_2_null = df[column_2_name].isna()
+        print(f'{column_1_name} null percentage: {len(col_1_null.loc[lambda x: x == True])/len(df)}')
+        print(f'{column_2_name} null percentage: {len(col_2_null.loc[lambda x: x == True])/len(df)}')
     print(f'agreement percentage: {len(agree_df)/len(df)}')
