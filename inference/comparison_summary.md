@@ -5,4 +5,4 @@
 - Percent of same predicted types including null biolink:NamedThing types from both models is `54.38%`
 - Percent of same predicted types excluding null biolink:NamedThing types is `19.43%`
 - Percent of different predicted types from two models is `45.62%`
-- Breakdown type comparisons between two models can be found in `sapbert/data/comparison` directory.
+- Breakdown type comparisons between two models can be obtained by running the `sapbert/inference/compare_prediction.py` script.
