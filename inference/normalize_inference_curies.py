@@ -1,5 +1,4 @@
 import pandas as pd
-import json
 import requests
 import argparse
 import warnings
