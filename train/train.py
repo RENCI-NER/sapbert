@@ -2,23 +2,18 @@
 import numpy as np
 import argparse
 import torch
-import torch.optim as optim
-from torch.cuda.amp import autocast 
+from torch.cuda.amp import autocast
 from torch.cuda.amp import GradScaler
 from pytorch_metric_learning import samplers
 import logging
 import time
-import pdb
 import os
-import json
 import random
 from tqdm import tqdm
 
 import sys
 sys.path.append("../") 
 
-import wandb
-wandb.init(project="sapbert")
 
 from src.data_loader import (
     DictionaryDataset,
@@ -36,6 +31,7 @@ from src.metric_learning import (
 
 LOGGER = logging.getLogger()
 
+
 def parse_args():
     """
     Parse input arguments
@@ -49,7 +45,8 @@ def parse_args():
                     help='training set directory')
     parser.add_argument('--output_dir', type=str, required=True,
                         help='Directory for output')
-    
+    parser.add_argument('--logging_file', type=str, default='',
+                        help='logging file with path')
     # Tokenizer settings
     parser.add_argument('--max_length', default=25, type=int)
 
@@ -96,6 +93,10 @@ def init_logging():
     console = logging.StreamHandler()
     console.setFormatter(fmt)
     LOGGER.addHandler(console)
+    if args.logging_file:
+        file_handler = logging.FileHandler(args.logging_file)
+        file_handler.setFormatter(fmt)
+        LOGGER.addHandler(file_handler)
 
 def init_seed(seed=None):
     if seed is None:
@@ -197,7 +198,6 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
             model.optimizer.step()
 
         train_loss += loss.item()
-        wandb.log({"Loss": loss.item()})
         train_steps += 1
         step_global += 1
         #if (i+1) % 10 == 0:
@@ -216,7 +216,7 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
 def main(args):
     init_logging()
     #init_seed(args.seed)
-    print(args)
+    print(args, flush=True)
 
     torch.manual_seed(args.random_seed)
     
