@@ -31,4 +31,4 @@ if __name__ == '__main__':
     # since pandas does not support multiple character separator, cannot directly use to_csv to
     # write data frame to csv with separator ||
     row_series = df[df.columns].astype(str).apply(lambda x: '||'.join(x), axis=1)
-    row_series.to_csv(output_file, index=False)
+    row_series.to_csv(output_file, header=False, sep='\t', index=False)
