@@ -124,8 +124,15 @@ class QueryDataset_custom(Dataset):
         """
         data = []
 
-        with open(data_dir, "r") as f:
-            lines = f.readlines()
+        if os.path.isfile(data_dir):
+            with open(data_dir, 'r') as f:
+                lines = f.readlines()
+        elif os.path.isdir(data_dir):
+            lines = []
+            file_list = os.listdir(data_dir)
+            for file in file_list:
+                with open(os.path.join(data_dir, file), 'r') as f:
+                    lines.append(f.readlines())
 
         for line in lines:
             line = line.rstrip("\n")
@@ -189,8 +196,16 @@ class QueryDataset_pretraining(Dataset):
         data = []
 
         #concept_files = glob.glob(os.path.join(data_dir, "*.concept"))
-        with open(data_dir, "r") as f:
-            lines = f.readlines()
+
+        if os.path.isfile(data_dir):
+            with open(data_dir, 'r') as f:
+                lines = f.readlines()
+        elif os.path.isdir(data_dir):
+            lines = []
+            file_list = os.listdir(data_dir)
+            for file in file_list:
+                with open(os.path.join(data_dir, file), 'r') as f:
+                    lines.append(f.readlines())
 
         for row in lines:
             row = row.rstrip("\n")
@@ -326,8 +341,15 @@ class MetricLearningDataset_pairwise(Dataset):
     """
     def __init__(self, path, tokenizer): #d_ratio, s_score_matrix, s_candidate_idxs):
 
-        with open(path, 'r') as f:
-            lines = f.readlines()
+        if os.path.isfile(path):
+            with open(path, 'r') as f:
+                lines = f.readlines()
+        elif os.path.isdir(path):
+            lines = []
+            file_list = os.listdir(path)
+            for file in file_list:
+                with open(os.path.join(path, file), 'r') as f:
+                    lines.append(f.readlines())
         self.query_ids = []
         self.query_names = []
         for line in lines:
