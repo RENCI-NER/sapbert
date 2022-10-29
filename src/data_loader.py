@@ -1,11 +1,7 @@
-import re
 import os
 import glob
 import numpy as np
-import random
-import random
 import pandas as pd
-import json
 from torch.utils.data import Dataset
 import logging
 from tqdm import tqdm
@@ -350,6 +346,7 @@ class MetricLearningDataset_pairwise(Dataset):
             for file in file_list:
                 with open(os.path.join(path, file), 'r') as f:
                     lines.extend(f.readlines())
+        LOGGER.info(f'total lines of training data: {len(lines)}')
         self.query_ids = []
         self.query_names = []
         for line in lines:
