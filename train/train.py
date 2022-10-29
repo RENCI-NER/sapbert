@@ -200,9 +200,9 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
         train_loss += loss.item()
         train_steps += 1
         step_global += 1
-        #if (i+1) % 10 == 0:
-        #LOGGER.info ("epoch: {} loss: {:.3f}".format(i+1,train_loss / (train_steps+1e-9)))
-        #LOGGER.info ("epoch: {} loss: {:.3f}".format(i+1, loss.item()))
+        if (i+1) % 10 == 0:
+            LOGGER.info ("epoch: {} loss: {:.3f}".format(i+1,train_loss / (train_steps+1e-9)))
+            LOGGER.info ("epoch: {} loss: {:.3f}".format(i+1, loss.item()))
 
         # save model every K iterations
         if step_global % args.checkpoint_step == 0:
@@ -216,7 +216,7 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
 def main(args):
     init_logging()
     #init_seed(args.seed)
-    print(args, flush=True)
+    LOGGER.info(args)
 
     torch.manual_seed(args.random_seed)
     
@@ -275,6 +275,7 @@ def main(args):
         return  query_encodings1, query_encodings2, query_ids
 
     if args.pairwise:
+        LOGGER.info("using pairwise")
         train_set = MetricLearningDataset_pairwise(
                 path=args.train_dir,
                 tokenizer = tokenizer
@@ -287,6 +288,7 @@ def main(args):
             collate_fn=collate_fn_batch_encoding
         )
     else:
+        LOGGER.info("not using pairwise")
         train_set = MetricLearningDataset(
             path=args.train_dir,
             tokenizer = tokenizer
