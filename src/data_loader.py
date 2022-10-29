@@ -132,7 +132,7 @@ class QueryDataset_custom(Dataset):
             file_list = os.listdir(data_dir)
             for file in file_list:
                 with open(os.path.join(data_dir, file), 'r') as f:
-                    lines.append(f.readlines())
+                    lines.extend(f.readlines())
 
         for line in lines:
             line = line.rstrip("\n")
@@ -205,7 +205,7 @@ class QueryDataset_pretraining(Dataset):
             file_list = os.listdir(data_dir)
             for file in file_list:
                 with open(os.path.join(data_dir, file), 'r') as f:
-                    lines.append(f.readlines())
+                    lines.extend(f.readlines())
 
         for row in lines:
             row = row.rstrip("\n")
@@ -349,7 +349,7 @@ class MetricLearningDataset_pairwise(Dataset):
             file_list = os.listdir(path)
             for file in file_list:
                 with open(os.path.join(path, file), 'r') as f:
-                    lines.append(f.readlines())
+                    lines.extend(f.readlines())
         self.query_ids = []
         self.query_names = []
         for line in lines:
@@ -390,7 +390,7 @@ class MetricLearningDataset(Dataset):
             file_list = os.listdir(path)
             for file in file_list:
                 with open(os.path.join(path, file), 'r') as f:
-                    lines.append(f.readlines())
+                    lines.extend(f.readlines())
         LOGGER.info(f'total lines of training data: {len(lines)}')
         self.query_ids = []
         self.query_names = []
