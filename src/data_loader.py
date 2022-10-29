@@ -325,6 +325,7 @@ class MetricLearningDataset_pairwise(Dataset):
         query_tokens, candidate_tokens, label
     """
     def __init__(self, path, tokenizer): #d_ratio, s_score_matrix, s_candidate_idxs):
+
         with open(path, 'r') as f:
             lines = f.readlines()
         self.query_ids = []
@@ -359,8 +360,16 @@ class MetricLearningDataset(Dataset):
     """
     def __init__(self, path, tokenizer): #d_ratio, s_score_matrix, s_candidate_idxs):
         LOGGER.info("Initializing metric learning data set! ...")
-        with open(path, 'r') as f:
-            lines = f.readlines()
+        if os.path.isfile(path):
+            with open(path, 'r') as f:
+                lines = f.readlines()
+        elif os.path.isdir(path):
+            lines = []
+            file_list = os.listdir(path)
+            for file in file_list:
+                with open(os.path.join(path, file), 'r') as f:
+                    lines.append(f.readlines())
+        LOGGER.info(f'total lines of training data: {len(lines)}')
         self.query_ids = []
         self.query_names = []
         cuis = []
