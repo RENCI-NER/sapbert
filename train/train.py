@@ -207,6 +207,7 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
         # save model every K iterations
         if step_global % args.checkpoint_step == 0:
             checkpoint_dir = os.path.join(args.output_dir, "checkpoint_iter_{}".format(str(step_global)))
+            LOGGER.info("Checkpoint saved, epoch: {} loss: {:.3f}".format(i + 1, loss.item()))
             if not os.path.exists(checkpoint_dir):
                 os.makedirs(checkpoint_dir)
             model_wrapper.save_model(checkpoint_dir)
