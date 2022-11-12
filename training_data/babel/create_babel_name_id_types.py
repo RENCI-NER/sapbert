@@ -17,7 +17,7 @@ if __name__ == '__main__':
     parser.add_argument('--remove_last_char_in_last_column', action="store_true")
     parser.add_argument('--concatenate_all', action="store_true")
     parser.add_argument('--output_path', type=str,
-                        default='/projects/ner/software/sapbert/sapbert/data/babel',
+                        default='/projects/ner/software/sapbert/sapbert/data/babel/mapping',
                         help='output path to write name-id pairs and id-type pairs')
 
     args = parser.parse_args()
@@ -40,7 +40,7 @@ if __name__ == '__main__':
         if concatenate_all:
             id_type_dfs.append(id_type_df)
         else:
-            id_type_df.to_csv(os.path.join(output_path, f'{f}_id_types.csv'), index=False)
+            id_type_df.to_csv(os.path.join(output_path, f'{os.path.splitext(f)[0]}_id_types.csv'), index=False)
         df1 = df.groupby(['name1', 'id']).size().reset_index().rename(
             columns={0:'count', 'name1': 'Name', 'id': 'ID'})
         df2 = df.groupby(['name2', 'id']).size().reset_index().rename(
@@ -49,7 +49,7 @@ if __name__ == '__main__':
         if concatenate_all:
             name_id_dfs.append(name_id_df)
         else:
-            name_id_df.to_csv(os.path.join(output_path, f'{f}_id_types.csv'), index=False)
+            name_id_df.to_csv(os.path.join(output_path, f'{f}_name_ids.csv'), index=False)
 
     if concatenate_all:
         pd.concat(id_type_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'id_types.csv'), index=False)
