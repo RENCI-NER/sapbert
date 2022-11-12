@@ -30,6 +30,7 @@ if __name__ == '__main__':
         id_type_dfs = []
         name_id_dfs = []
     for f in input_file_list:
+        base_f = os.path.splitext(f)[0]
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None)
         if remove_last_char_in_last_column:
             df[3] = df[3].str[:-1]
@@ -40,7 +41,7 @@ if __name__ == '__main__':
         if concatenate_all:
             id_type_dfs.append(id_type_df)
         else:
-            id_type_df.to_csv(os.path.join(output_path, f'{os.path.splitext(f)[0]}_id_types.csv'), index=False)
+            id_type_df.to_csv(os.path.join(output_path, f'{base_f}_id_types.csv'), index=False)
         df1 = df.groupby(['name1', 'id']).size().reset_index().rename(
             columns={0:'count', 'name1': 'Name', 'id': 'ID'})
         df2 = df.groupby(['name2', 'id']).size().reset_index().rename(
@@ -49,7 +50,7 @@ if __name__ == '__main__':
         if concatenate_all:
             name_id_dfs.append(name_id_df)
         else:
-            name_id_df.to_csv(os.path.join(output_path, f'{f}_name_ids.csv'), index=False)
+            name_id_df.to_csv(os.path.join(output_path, f'{base_f}_name_ids.csv'), index=False)
 
     if concatenate_all:
         pd.concat(id_type_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'id_types.csv'), index=False)
