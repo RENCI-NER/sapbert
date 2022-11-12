@@ -15,6 +15,7 @@ if __name__ == '__main__':
         'MolecularMixture.txt', 'Gene.txt', 'SmallMolecule.txt', 'Protein.txt'
     ], help='input file list to process')
     parser.add_argument('--remove_last_char_in_last_column', action="store_true")
+    parser.add_argument('--concatenate_all', action="store_true")
     parser.add_argument('--output_path', type=str,
                         default='/projects/ner/software/sapbert/sapbert/data/babel',
                         help='output path to write name-id pairs and id-type pairs')
@@ -22,10 +23,12 @@ if __name__ == '__main__':
     args = parser.parse_args()
     output_path = args.output_path
     remove_last_char_in_last_column = args.remove_last_char_in_last_column
+    concatenate_all = args.concatenate_all
     input_file_dir = args.input_file_dir
     input_file_list = args.input_file_list
-    id_type_dfs = []
-    name_id_dfs = []
+    if concatenate_all:
+        id_type_dfs = []
+        name_id_dfs = []
     for f in input_file_list:
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None)
         if remove_last_char_in_last_column:
@@ -34,14 +37,20 @@ if __name__ == '__main__':
         # create id-type mapping data frame
         id_type_df = df.groupby(['id', 'type']).size().reset_index().rename(columns={0:'count'})
         id_type_df.drop(columns=['count'], inplace=True)
-        id_type_dfs.append(id_type_df)
-
+        if concatenate_all:
+            id_type_dfs.append(id_type_df)
+        else:
+            id_type_df.to_csv(os.path.join(output_path, f'{f}_id_types.csv'), index=False)
         df1 = df.groupby(['name1', 'id']).size().reset_index().rename(
             columns={0:'count', 'name1': 'Name', 'id': 'ID'})
         df2 = df.groupby(['name2', 'id']).size().reset_index().rename(
             columns={0: 'count', 'name2': 'Name', 'id': 'ID'})
         name_id_df = pd.concat([df1, df2]).drop(columns=['count']).drop_duplicates()
-        name_id_dfs.append(name_id_df)
+        if concatenate_all:
+            name_id_dfs.append(name_id_df)
+        else:
+            name_id_df.to_csv(os.path.join(output_path, f'{f}_id_types.csv'), index=False)
 
-    pd.concat(id_type_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'id_types.csv'), index=False)
-    pd.concat(name_id_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'name_ids.csv'), index=False)
+    if concatenate_all:
+        pd.concat(id_type_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'id_types.csv'), index=False)
+        pd.concat(name_id_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'name_ids.csv'), index=False)
