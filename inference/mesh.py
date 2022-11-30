@@ -15,5 +15,7 @@ class MESH:
         names = bs_data.find_all('DescriptorName')
         ids = bs_data.find_all('DescriptorUI')
         for name_xml, id_xml in zip(names, ids):
-            self.names.append(name_xml.get_text())
-            self.ids.append(id_xml.get_text())
+            identifier = id_xml.get_text()
+            if identifier not in self.ids:
+                self.ids.append(identifier)
+                self.names.append(name_xml.get_text())
