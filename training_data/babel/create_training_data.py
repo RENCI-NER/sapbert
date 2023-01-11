@@ -5,7 +5,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
     parser.add_argument('--input_file_dir', type=str,
-                        default='/projects/babel/sapbert-training/2022oct13-lc/compendia/',
+                        default='/projects/babel/sapbert-training/2022dec2-2-lc/compendia/',
                         help='input file directory to concatenate with input_file_list')
     parser.add_argument('--input_file_list', type=list, default=[
         'AnatomicalEntity.txt', 'GrossAnatomicalStructure.txt', 'ComplexMolecularMixture.txt',
