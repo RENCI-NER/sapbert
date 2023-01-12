@@ -5,7 +5,7 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
     parser.add_argument('--input_file_dir', type=str,
-                        default='/projects/babel/sapbert-training/2022oct13-lc/compendia/',
+                        default='/projects/babel/sapbert-training/2022dec2-2-lc/compendia/',
                         help='input file directory to concatenate with input_file_list')
     parser.add_argument('--input_file_list', type=list, default=[
        'AnatomicalEntity.txt', 'GrossAnatomicalStructure.txt', 'ComplexMolecularMixture.txt',
@@ -14,7 +14,6 @@ if __name__ == '__main__':
         'PhenotypicFeature.txt', 'Disease.txt', 'umls.txt', 'OrganismTaxon.txt', 'ChemicalEntity.txt',
         'MolecularMixture.txt', 'Gene.txt', 'SmallMolecule.txt', 'Protein.txt'
     ], help='input file list to process')
-    parser.add_argument('--remove_last_char_in_last_column', action="store_true")
     parser.add_argument('--concatenate_all', action="store_true")
     parser.add_argument('--output_path', type=str,
                         default='/projects/ner/software/sapbert/sapbert/data/babel/mapping',
@@ -22,7 +21,6 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     output_path = args.output_path
-    remove_last_char_in_last_column = args.remove_last_char_in_last_column
     concatenate_all = args.concatenate_all
     input_file_dir = args.input_file_dir
     input_file_list = args.input_file_list
@@ -32,8 +30,6 @@ if __name__ == '__main__':
     for f in input_file_list:
         base_f = os.path.splitext(f)[0]
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None)
-        if remove_last_char_in_last_column:
-            df[3] = df[3].str[:-1]
         df.columns = ['type', 'id', 'name1', 'name2']
         # create id-type mapping data frame
         id_type_df = df.groupby(['id', 'type']).size().reset_index().rename(columns={0:'count'})
