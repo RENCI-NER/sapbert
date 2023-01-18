@@ -49,5 +49,10 @@ if __name__ == '__main__':
             name_id_df.to_csv(os.path.join(output_path, f'{base_f}_name_ids.csv'), index=False)
 
     if concatenate_all:
-        pd.concat(id_type_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'id_types.csv'), index=False)
-        pd.concat(name_id_dfs).drop_duplicates().to_csv(os.path.join(output_path, 'name_ids.csv'), index=False)
+        concat_id_type_df = pd.concat(id_type_dfs).drop_duplicates()
+        # combine multiple types mapped from the same id into a set using pivot table
+        df_id_type_pivot = pd.pivot_table(concat_id_type_df, values=['type'], index='id', aggfunc={'type': list})
+        df_id_type_pivot.to_csv(os.path.join(output_path, 'id_types.csv'), index=True)
+        ni_df = pd.concat(name_id_dfs).drop_duplicates()
+        df_ni_pivot = pd.pivot_table(ni_df, values=['ID'], index='Name', aggfunc={'ID': list})
+        df_ni_pivot.to_csv(os.path.join(output_path, 'name_ids.csv'), index=True)
