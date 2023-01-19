@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 import pandas as pd
-from .utils import sapbert_predict
+from utils import sapbert_predict
 
 
 if __name__ == '__main__':
