@@ -1,11 +1,11 @@
 import argparse
 from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModel
 import numpy as np
 import json
 import pandas as pd
 from mesh import MESH
 from scipy.spatial.distance import cdist
+from .utils import sapbert_predict
 
 
 if __name__ == '__main__':
@@ -30,28 +30,7 @@ if __name__ == '__main__':
     all_names = [name.strip('\n') for name in mesh.names]
     all_ids = mesh.ids
 
-    # load sapbert
-    tokenizer = AutoTokenizer.from_pretrained(MODEL_FOLDER)
-    model = AutoModel.from_pretrained(MODEL_FOLDER) #.cuda(1)
-
-    bs = 128
-    all_reps = []
-    for i in tqdm(np.arange(0, len(all_names), bs)):
-        toks = tokenizer.batch_encode_plus(all_names[i:i + bs],
-                                           padding="max_length",
-                                           max_length=25,
-                                           truncation=True,
-                                           return_tensors="pt")
-        # toks_cuda = {}
-        # for k,v in toks.items():
-        #    toks_cuda[k] = v.cuda(1)
-        # output = model(**toks_cuda)
-
-        output = model(**toks)
-        cls_rep = output[0][:, 0, :]
-
-        all_reps.append(cls_rep.cpu().detach().numpy())
-    all_reps_emb = np.concatenate(all_reps, axis=0)
+    model, tokenizer, all_reps_emb = sapbert_predict(MODEL_FOLDER, all_names, use_gpu=False)
 
     # do inference with pubmed data
     pubmed_pairs = []
