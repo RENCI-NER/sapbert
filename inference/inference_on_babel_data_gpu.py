@@ -12,7 +12,7 @@ if __name__ == '__main__':
                         help='SapBERT model trained from babel data')
     parser.add_argument('--BABEL_OUTPUT_FILE', type=str, default='/data/babel/babel_prediction_output.npy',
                         help='SapBERT model inference output file for babel input file')
-    parser.add_argument('--BABEL_OUTPUT_SHAPE_FILE', type=str, default='/data/babel_prediction_output_shape.txt',
+    parser.add_argument('--BABEL_OUTPUT_SHAPE_FILE', type=str, default='/data/babel/babel_prediction_output_shape.txt',
                         help='SapBERT model inference output shape file for babel input file')
 
     args = parser.parse_args()

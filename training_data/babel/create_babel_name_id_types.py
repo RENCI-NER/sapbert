@@ -2,6 +2,14 @@ import pandas as pd
 import os
 import argparse
 
+
+def map_ids_to_types(id_list, df_id_types):
+    ids_to_types = {}
+    for id in id_list:
+        ids_to_types[id] = sum(df_id_types[df_id_types.id==id]['type'].tolist(), [])
+    return ids_to_types
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
     parser.add_argument('--input_file_dir', type=str,
@@ -56,3 +64,10 @@ if __name__ == '__main__':
         ni_df = pd.concat(name_id_dfs).drop_duplicates()
         df_ni_pivot = pd.pivot_table(ni_df, values=['ID'], index='Name', aggfunc={'ID': list})
         df_ni_pivot.to_csv(os.path.join(output_path, 'name_ids.csv'), index=True)
+        # note when reading dataframe back, ID column will be of string type, which can be converted back to list
+        # by using df_ni_pivot['ID'] = df_ni_pivot['ID'].map(lambda d: ast.literal_eval(d))
+        # df_id_type_pivot['type'] = df_id_type_pivot['type'].map(lambda d: ast.literal_eval(d))
+        # note the map_ids_to_types() applied to each row could take a very long time
+        df_ni_pivot['id_type'] = df_ni_pivot.apply(lambda row: map_ids_to_types(row.ID, df_id_type_pivot), axis=1)
+        df_ni_pivot.drop(columns=['ID'])
+        df_ni_pivot.to_csv(os.path.join(output_path, 'name_id_types.csv'), index=True)
