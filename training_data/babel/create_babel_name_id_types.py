@@ -40,7 +40,7 @@ if __name__ == '__main__':
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None)
         df.columns = ['type', 'id', 'name', 'name1', 'name2']
         # create id-type mapping data frame
-        id_type_df = df.groupby(['id', 'type']).size().reset_index().rename(columns={0:'count'})
+        id_type_df = df.groupby(['id', 'type']).size().reset_index().rename(columns={0: 'count'})
         id_type_df.drop(columns=['count'], inplace=True)
         if concatenate_all:
             id_type_dfs.append(id_type_df)
