@@ -51,8 +51,7 @@ if __name__ == '__main__':
         name_id_df = name_id_df.drop(columns=['count'])
         if concatenate_all:
             name_id_dfs.append(name_id_df)
-        else:
-            name_id_df.to_csv(os.path.join(output_path, f'{base_f}_name_ids.csv'), index=False)
+        name_id_df.to_csv(os.path.join(output_path, f'{base_f}_name_ids.csv'), index=False)
 
     if concatenate_all:
         concat_id_type_df = pd.concat(id_type_dfs).drop_duplicates()
