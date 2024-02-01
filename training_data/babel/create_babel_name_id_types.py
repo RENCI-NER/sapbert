@@ -13,18 +13,17 @@ def map_ids_to_types(id_list, df_id_types):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
     parser.add_argument('--input_file_dir', type=str,
-                        default='/projects/babel/sapbert-training/2022dec2-2-lc-2023mar9/compendia/',
+                        default='/projects/babel/babel-outputs/2024jan9/sapbert-training-data',
                         help='input file directory to concatenate with input_file_list')
     parser.add_argument('--input_file_list', type=list, default=[
-       'AnatomicalEntity.txt', 'GrossAnatomicalStructure.txt', 'ComplexMolecularMixture.txt',
-        'ChemicalMixture.txt', 'Polypeptide.txt', 'Cell.txt',
+        'AnatomicalEntity.txt', 'GrossAnatomicalStructure.txt', 'Cell.txt',
         'CellularComponent.txt', 'BiologicalProcess.txt', 'Pathway.txt', 'MolecularActivity.txt',
-        'PhenotypicFeature.txt', 'Disease.txt', 'umls.txt', 'OrganismTaxon.txt', 'ChemicalEntity.txt',
-        'MolecularMixture.txt', 'Gene.txt', 'SmallMolecule.txt', 'Protein.txt'
+        'PhenotypicFeature.txt', 'Disease.txt', 'umls.txt', 'OrganismTaxon.txt',
+        'Gene.txt', 'Protein.txt', 'DrugChemicalConflated.txt', 'GeneFamily.txt'
     ], help='input file list to process')
     parser.add_argument('--concatenate_all', action="store_true")
     parser.add_argument('--output_path', type=str,
-                        default='/projects/ner/software/sapbert/sapbert/data/babel/updated_mapping',
+                        default='/projects/ner/software/sapbert/sapbert/data/babel/2024_v2/updated_mapping',
                         help='output path to write name-id pairs and id-type pairs')
 
     args = parser.parse_args()
@@ -37,7 +36,8 @@ if __name__ == '__main__':
         name_id_dfs = []
     for f in input_file_list:
         base_f = os.path.splitext(f)[0]
-        df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None)
+        print(f'processing {f}', flush=True)
+        df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None, engine='python')
         df.columns = ['type', 'id', 'name', 'name1', 'name2']
         # create id-type mapping data frame
         id_type_df = df.groupby(['id', 'type']).size().reset_index().rename(columns={0: 'count'})
