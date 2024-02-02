@@ -44,8 +44,7 @@ if __name__ == '__main__':
         id_type_df.drop(columns=['count'], inplace=True)
         if concatenate_all:
             id_type_dfs.append(id_type_df)
-        else:
-            id_type_df.to_csv(os.path.join(output_path, f'{base_f}_id_types.csv'), index=False)
+        id_type_df.to_csv(os.path.join(output_path, f'{base_f}_id_types.csv'), index=False)
         name_id_df = df.groupby(['name', 'id']).size().reset_index().rename(
             columns={0: 'count', 'name': 'Name', 'id': 'ID'})
         name_id_df = name_id_df.drop(columns=['count'])
