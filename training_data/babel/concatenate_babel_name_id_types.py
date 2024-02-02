@@ -32,8 +32,8 @@ if __name__ == '__main__':
         base_f = os.path.splitext(f)[0]
         print(f'processing {f}', flush=True)
         name_id_df = pd.read_csv(os.path.join(input_file_dir, f'{base_f}_name_ids.csv'))
-        name_id_df['Name'] = name_id_dfs['Name'].str.strip()
-        name_id_df['ID'] = name_id_dfs['ID'].str.strip()
+        name_id_df['Name'] = name_id_df['Name'].str.strip()
+        name_id_df['ID'] = name_id_df['ID'].str.strip()
         name_id_dfs.append(name_id_df)
         # create id-type mapping data frame
         id_type_df = pd.read_csv(os.path.join(input_file_dir, f'{base_f}_id_types.csv'))
