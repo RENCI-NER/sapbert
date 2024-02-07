@@ -1,4 +1,5 @@
 import os
+import gc
 import glob
 import numpy as np
 import pandas as pd
@@ -336,27 +337,26 @@ class MetricLearningDataset_pairwise(Dataset):
         query_tokens, candidate_tokens, label
     """
     def __init__(self, path, tokenizer): #d_ratio, s_score_matrix, s_candidate_idxs):
-
         if os.path.isfile(path):
             with open(path, 'r') as f:
-                lines = f.readlines()
+                id_names = [line.rstrip("\n").split("||") for line in f.readlines()]
+            self.query_ids = [id_name[0] for id_name in id_names]
+            self.query_names = [(id_name[1], id_name[2]) for id_name in id_names]
         elif os.path.isdir(path):
-            lines = []
-            file_list = os.listdir(path)
-            for file in file_list:
-                with open(os.path.join(path, file), 'r') as f:
-                    lines.extend(f.readlines())
-        LOGGER.info(f'total lines of training data: {len(lines)}')
-        self.query_ids = []
-        self.query_names = []
-        for line in lines:
-            line = line.rstrip("\n")
-            query_id, name1, name2 = line.split("||")
-            self.query_ids.append(query_id)
-            self.query_names.append((name1, name2))
+            dfs = [pd.read_csv(os.path.join(path, file), sep='\|\|', header=None, engine='python')
+                   for file in os.listdir(path)]
+            LOGGER.info(f'total files read: {len(dfs)}')
+            self.query_ids = pd.concat([df[0] for df in dfs]).tolist()
+            LOGGER.info(f'total query_ids: {len(self.query_ids)}')
+            qry_names = pd.concat([df[[1, 2]] for df in dfs])
+            self.query_names = list(zip(qry_names[1], qry_names[2]))
+            LOGGER.info(f'total query_names: {len(self.query_names)}')
+
         self.tokenizer = tokenizer
         self.query_id_2_index_id = {k: v for v, k in enumerate(list(set(self.query_ids)))}
-    
+        count = gc.collect()
+        LOGGER.info(f'end of init, {count} gc collected')
+
     def __getitem__(self, query_idx):
 
         query_name1 = self.query_names[query_idx][0]
