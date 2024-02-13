@@ -26,7 +26,7 @@ if __name__ == '__main__':
         # the columns of the input data are biolink curie || id || name || name1 || name2 where name is the
         # canonical label to create name to id pairs for sapbert predictions
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None,
-                         usecols=[1, 3, 4], names=["ID", "NAME1", "NAME2"], engine='python')
+                         usecols=[1, 3, 4], names=["ID", "NAME1", "NAME2"], dtype=str, engine='python')
         # the two statements below will not be needed here next time when babel input data is updated since
         # they will be taken care of on the babel side
         df['NAME1'] = df['NAME1'].apply(lambda x: x.strip().lower())
