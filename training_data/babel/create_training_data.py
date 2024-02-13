@@ -5,17 +5,13 @@ import argparse
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
     parser.add_argument('--input_file_dir', type=str,
-                        # default='/projects/babel/babel-outputs/2024jan9/sapbert-training-data',
-                        default='/home/hongyi/sapbert/data/babel/input',
+                        default='/projects/babel/babel-outputs/2024jan9/sapbert-training-data',
                         help='input file directory to concatenate with input_file_list')
-    # parser.add_argument('--input_file_list', type=list, default=[
-    #     'AnatomicalEntity.txt', 'GrossAnatomicalStructure.txt', 'Cell.txt',
-    #     'CellularComponent.txt', 'BiologicalProcess.txt', 'Pathway.txt', 'MolecularActivity.txt',
-    #     'PhenotypicFeature.txt', 'Disease.txt', 'umls.txt', 'OrganismTaxon.txt',
-    #     'Gene.txt', 'Protein.txt', 'DrugChemicalConflated.txt', 'GeneFamily.txt'
-    # ], help='input file list to process')
     parser.add_argument('--input_file_list', type=list, default=[
-        'GeneFamily.txt'
+        'AnatomicalEntity.txt', 'GrossAnatomicalStructure.txt', 'Cell.txt',
+        'CellularComponent.txt', 'BiologicalProcess.txt', 'Pathway.txt', 'MolecularActivity.txt',
+        'PhenotypicFeature.txt', 'Disease.txt', 'umls.txt', 'OrganismTaxon.txt',
+        'Gene.txt', 'Protein.txt', 'DrugChemicalConflated.txt', 'GeneFamily.txt'
     ], help='input file list to process')
     parser.add_argument('--output_dir', type=str,
                         default='/projects/ner/software/sapbert/sapbert/data/babel/2024_v2',
