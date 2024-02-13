@@ -27,14 +27,18 @@ if __name__ == '__main__':
         # canonical label to create name to id pairs for sapbert predictions
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None,
                          usecols=[1, 3, 4], names=["ID", "NAME1", "NAME2"], engine='python')
+        # the two statements below will not be needed here next time when babel input data is updated since
+        # they will be taken care of on the babel side
         df['NAME1'] = df['NAME1'].apply(lambda x: x.strip().lower())
         df['NAME2'] = df['NAME2'].apply(lambda x: x.strip().lower())
 
         # filter out those rows where the synonym pairs are the same with case-insensitive comparison
         df = df[df.NAME1 != df.NAME2]
-
-        # since pandas does not support multiple character separator, cannot directly use to_csv to
-        # write data frame to csv with separator ||
-        row_series = df[df.columns].astype(str).apply(lambda x: '||'.join(x), axis=1)
-        row_series.to_csv(os.path.join(output_dir, f),
-                          header=False, sep='\t', index=False)
+        if df.empty:
+            print(f'data {f} is empty after filtering out synonym pairs with the same names', flush=True)
+        else:
+            # since pandas does not support multiple character separator, cannot directly use to_csv to
+            # write data frame to csv with separator ||
+            row_series = df[df.columns].astype(str).apply(lambda x: '||'.join(x), axis=1)
+            row_series.to_csv(os.path.join(output_dir, f),
+                              header=False, sep='\t', index=False)
