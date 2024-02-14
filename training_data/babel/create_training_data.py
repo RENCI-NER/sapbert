@@ -29,8 +29,8 @@ if __name__ == '__main__':
                          usecols=[1, 3, 4], names=["ID", "NAME1", "NAME2"], dtype=str, engine='python')
         # the two statements below will not be needed here next time when babel input data is updated since
         # they will be taken care of on the babel side
-        df['NAME1'] = df['NAME1'].apply(lambda x: x.strip().lower())
-        df['NAME2'] = df['NAME2'].apply(lambda x: x.strip().lower())
+        df['NAME1'] = df['NAME1'].apply(lambda x: str(x).strip().lower())
+        df['NAME2'] = df['NAME2'].apply(lambda x: str(x).strip().lower())
 
         # filter out those rows where the synonym pairs are the same with case-insensitive comparison
         df = df[df.NAME1 != df.NAME2]
