@@ -343,7 +343,8 @@ class MetricLearningDataset_pairwise(Dataset):
             self.query_ids = [id_name[0] for id_name in id_names]
             self.query_names = [(id_name[1], id_name[2]) for id_name in id_names]
         elif os.path.isdir(path):
-            dfs = [pd.read_csv(os.path.join(path, file), sep='\|\|', header=None, engine='python')
+            dfs = [pd.read_csv(os.path.join(path, file), sep='\|\|', header=None, skipinitialspace=True,
+                               na_filter=False, engine='python')
                    for file in os.listdir(path)]
             LOGGER.info(f'total files read: {len(dfs)}')
             self.query_ids = pd.concat([df[0] for df in dfs]).tolist()
