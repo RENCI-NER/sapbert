@@ -12,7 +12,8 @@ import random
 from tqdm import tqdm
 
 import sys
-sys.path.append("../") 
+
+sys.path.append("../")
 
 
 from src.data_loader import (
@@ -81,7 +82,7 @@ def parse_args():
     parser.add_argument('--use_miner', action="store_true") 
     parser.add_argument('--miner_margin', default=0.2, type=float) 
     parser.add_argument('--type_of_triplets', default="all", type=str) 
-    parser.add_argument('--agg_mode', default="cls", type=str, help="{cls|mean|mean_all_tok}") 
+    parser.add_argument('--agg_mode', default="cls", type=str, help="{cls|mean|mean_all_tok}")
     parser.add_argument('--trust_remote_code', action="store_true",
                         help="allow for custom models defined in their own modeling files")
 
@@ -178,14 +179,14 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
         model.optimizer.zero_grad()
 
         batch_x1, batch_x2, batch_y = data
-        batch_x_cuda1, batch_x_cuda2 = {},{}
-        for k,v in batch_x1.items():
+        batch_x_cuda1, batch_x_cuda2 = {}, {}
+        for k, v in batch_x1.items():
             batch_x_cuda1[k] = v.cuda()
-        for k,v in batch_x2.items():
+        for k, v in batch_x2.items():
             batch_x_cuda2[k] = v.cuda()
 
         batch_y_cuda = batch_y.cuda()
-    
+
         if args.amp:
             with autocast():
                 loss = model(batch_x_cuda1, batch_x_cuda2, batch_y_cuda)  
@@ -203,8 +204,7 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
         train_steps += 1
         step_global += 1
         if (i+1) % 10 == 0:
-            LOGGER.info ("epoch: {} loss: {:.3f}".format(i+1,train_loss / (train_steps+1e-9)))
-            LOGGER.info ("epoch: {} loss: {:.3f}".format(i+1, loss.item()))
+            LOGGER.info("epoch: {} loss: {:.3f}, {:.3f}".format(i + 1, train_loss / (train_steps + 1e-9), loss.item()))
 
         # save model every K iterations
         if step_global % args.checkpoint_step == 0:
@@ -213,6 +213,9 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
             if not os.path.exists(checkpoint_dir):
                 os.makedirs(checkpoint_dir)
             model_wrapper.save_model(checkpoint_dir)
+
+        del batch_x_cuda1, batch_x_cuda2, batch_y_cuda, loss, data
+
     train_loss /= (train_steps + 1e-9)
     return train_loss, step_global
     
@@ -257,26 +260,31 @@ def main(args):
         LOGGER.info("using nn.DataParallel")
     
     def collate_fn_batch_encoding(batch):
-        query1, query2, query_id = zip(*batch)
-        query_encodings1 = tokenizer.batch_encode_plus(
-                list(query1), 
-                max_length=args.max_length, 
-                padding="max_length", 
-                truncation=True,
-                add_special_tokens=True,
-                return_tensors="pt")
-        query_encodings2 = tokenizer.batch_encode_plus(
-                list(query2), 
-                max_length=args.max_length, 
-                padding="max_length", 
-                truncation=True,
-                add_special_tokens=True,
-                return_tensors="pt")
-        #query_encodings_cuda = {}
-        #for k,v in query_encodings.items():
-        #    query_encodings_cuda[k] = v.cuda()
-        query_ids = torch.tensor(list(query_id))
-        return  query_encodings1, query_encodings2, query_ids
+        try:
+            query1, query2, query_id = zip(*batch)
+            query_encodings1 = tokenizer.batch_encode_plus(
+                    list(query1),
+                    max_length=args.max_length,
+                    padding="max_length",
+                    truncation=True,
+                    add_special_tokens=True,
+                    return_tensors="pt")
+            query_encodings2 = tokenizer.batch_encode_plus(
+                    list(query2),
+                    max_length=args.max_length,
+                    padding="max_length",
+                    truncation=True,
+                    add_special_tokens=True,
+                    return_tensors="pt")
+            #query_encodings_cuda = {}
+            #for k,v in query_encodings.items():
+            #    query_encodings_cuda[k] = v.cuda()
+            query_ids = torch.tensor(list(query_id))
+            return query_encodings1, query_encodings2, query_ids
+        except Exception as ex:
+            LOGGER.info(f'query1: {query1}, query2: {query2}, query_id: {query_id}')
+            LOGGER.error(ex)
+            raise
 
     if args.pairwise:
         LOGGER.info("using pairwise")
