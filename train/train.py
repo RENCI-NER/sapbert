@@ -8,6 +8,7 @@ from pytorch_metric_learning import samplers
 import logging
 import time
 import os
+import gc
 import random
 from tqdm import tqdm
 
@@ -179,12 +180,8 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
         model.optimizer.zero_grad()
 
         batch_x1, batch_x2, batch_y = data
-        batch_x_cuda1, batch_x_cuda2 = {}, {}
-        for k, v in batch_x1.items():
-            batch_x_cuda1[k] = v.cuda()
-        for k, v in batch_x2.items():
-            batch_x_cuda2[k] = v.cuda()
-
+        batch_x_cuda1 = {k: v.cuda() for k, v in batch_x1.items()}
+        batch_x_cuda2 = {k: v.cuda() for k, v in batch_x2.items()}
         batch_y_cuda = batch_y.cuda()
 
         if args.amp:
@@ -207,15 +204,17 @@ def train(args, data_loader, model, scaler=None, model_wrapper=None, step_global
             LOGGER.info("epoch: {} loss: {:.3f}, {:.3f}".format(i + 1, train_loss / (train_steps + 1e-9), loss.item()))
 
         # save model every K iterations
-        if step_global % args.checkpoint_step == 0:
-            checkpoint_dir = os.path.join(args.output_dir, "checkpoint_iter_{}".format(str(step_global)))
-            LOGGER.info("Checkpoint saved, epoch: {} loss: {:.3f}".format(i + 1, loss.item()))
-            if not os.path.exists(checkpoint_dir):
-                os.makedirs(checkpoint_dir)
-            model_wrapper.save_model(checkpoint_dir)
+        # if step_global % args.checkpoint_step == 0:
+        #     checkpoint_dir = os.path.join(args.output_dir, "checkpoint_iter_{}".format(str(step_global)))
+        #     LOGGER.info("Checkpoint saved, epoch: {} loss: {:.3f}".format(i + 1, loss.item()))
+        #     if not os.path.exists(checkpoint_dir):
+        #         os.makedirs(checkpoint_dir)
+        #     model_wrapper.save_model(checkpoint_dir)
 
         del batch_x_cuda1, batch_x_cuda2, batch_y_cuda, loss, data
-
+        count = gc.collect()
+        if count > 0:
+            LOGGER.info(f'{count} gc collected')
     train_loss /= (train_steps + 1e-9)
     return train_loss, step_global
     
