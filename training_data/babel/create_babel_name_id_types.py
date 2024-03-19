@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import argparse
+import numpy as np
 
 
 def map_ids_to_types(id_list, df_id_types):
@@ -34,12 +35,14 @@ if __name__ == '__main__':
     if concatenate_all:
         id_type_dfs = []
         name_id_dfs = []
+    unique_types = []
     for f in input_file_list:
         base_f = os.path.splitext(f)[0]
         print(f'processing {f}', flush=True)
         df = pd.read_csv(os.path.join(input_file_dir, f), sep='\|\|', header=None, engine='python')
         df.columns = ['type', 'id', 'name', 'name1', 'name2']
         # create id-type mapping data frame
+        unique_types.append(df['type'].unique())
         id_type_df = df.groupby(['id', 'type']).size().reset_index().rename(columns={0: 'count'})
         id_type_df.drop(columns=['count'], inplace=True)
         if concatenate_all:
@@ -51,6 +54,8 @@ if __name__ == '__main__':
         if concatenate_all:
             name_id_dfs.append(name_id_df)
         name_id_df.to_csv(os.path.join(output_path, f'{base_f}_name_ids.csv'), index=False)
+
+    print(f'unique biolink types: {np.unique(np.concatenate(unique_types))}', flush=True)
 
     if concatenate_all:
         concat_id_type_df = pd.concat(id_type_dfs).drop_duplicates()
