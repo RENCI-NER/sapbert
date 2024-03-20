@@ -1,6 +1,8 @@
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModel
 import numpy as np
+import logging
+LOGGER = logging.getLogger(__name__)
 
 
 def sapbert_predict(model_folder, all_names, use_gpu=True):
@@ -27,7 +29,7 @@ def sapbert_predict(model_folder, all_names, use_gpu=True):
         else:
             output = model(**toks)
         cls_rep = output[0][:, 0, :]
-
         all_reps.append(cls_rep.cpu().detach().numpy())
+        LOGGER.info(f'in sapbert_predict, batches done: {i+1}')
     all_reps_emb = np.concatenate(all_reps, axis=0)
     return model, tokenizer, all_reps_emb
