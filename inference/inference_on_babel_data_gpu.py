@@ -2,6 +2,7 @@ import argparse
 import numpy as np
 import pandas as pd
 import time
+import sys
 from utils import sapbert_predict
 
 
@@ -35,3 +36,4 @@ if __name__ == '__main__':
         f.write(str(all_reps_emb.shape))
 
     np.save(BABEL_OUTPUT_FILE, all_reps_emb)
+    sys.exit(0)
