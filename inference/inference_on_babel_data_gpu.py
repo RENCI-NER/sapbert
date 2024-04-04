@@ -39,7 +39,7 @@ if __name__ == '__main__':
             end = time.time()
             print(f"Time consumed in sapbert prediction for chunk {idx} is {end-start}", flush=True)
             base, ext = os.path.splitext(BABEL_OUTPUT_SHAPE_FILE)
-            with open(f'{base}_{idx}ext', 'w') as f:
+            with open(f'{base}_{idx}{ext}', 'w') as f:
                 f.write(str(all_reps_emb.shape))
             base, ext = os.path.splitext(BABEL_OUTPUT_FILE)
             np.save(f'{base}_{idx}{ext}', all_reps_emb)
