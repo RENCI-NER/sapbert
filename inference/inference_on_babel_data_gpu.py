@@ -15,12 +15,12 @@ if __name__ == '__main__':
                         help='babel terms and ids')
     parser.add_argument('--MODEL_FOLDER', type=str, default='/data/SapBERT-fine-tuned-babel',
                         help='SapBERT model trained from babel data')
-    parser.add_argument('--CHUNK_SIZE', type=int, default=5200000,
+    parser.add_argument('--CHUNK_SIZE', type=int, default=1000000,
                         help='chunk size to stream read csv input file. Set it to 0 to disable stream read')
-    parser.add_argument('--BABEL_OUTPUT_FILE', type=str, default='/babeldata/updated_mapping_gene/'
+    parser.add_argument('--BABEL_OUTPUT_FILE', type=str, default='/babeldata2/updated_mapping_gene/'
                                                                  'babel_prediction_output',
                         help='SapBERT model inference output file for babel input file')
-    parser.add_argument('--BABEL_OUTPUT_SHAPE_FILE', type=str, default='/babeldata/updated_mapping_gene/'
+    parser.add_argument('--BABEL_OUTPUT_SHAPE_FILE', type=str, default='/babeldata2/updated_mapping_gene/'
                                                                        'babel_prediction_output_shape.txt',
                         help='SapBERT model inference output shape file for babel input file')
 
@@ -41,7 +41,9 @@ if __name__ == '__main__':
     if CHUNK_SIZE > 0:
         idx = 0
         shape_base, shape_ext = os.path.splitext(BABEL_OUTPUT_SHAPE_FILE)
+        meta_base, meta_ext = os.path.splitext(INPUT_FILE_PATH)
         for df in pd.read_csv(INPUT_FILE_PATH, dtype=str, usecols=['Name'], chunksize=CHUNK_SIZE):
+            df.to_csv(f'{meta_base}_{idx}{meta_ext}', index=False)
             all_names = df.Name.tolist()
             start = time.time()
             _, _, all_reps_emb = sapbert_predict(MODEL_FOLDER, all_names)
