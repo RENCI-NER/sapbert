@@ -38,6 +38,10 @@ if __name__ == '__main__':
     else:
         match_type = ''
 
+    # make sure BABEL_OUTPUT_SHAPE_FILE path exists
+    output_dir = os.path.dirname(BABEL_OUTPUT_SHAPE_FILE)
+    os.makedirs(output_dir, exist_ok=True)
+
     if CHUNK_SIZE > 0:
         idx = 0
         shape_base, shape_ext = os.path.splitext(BABEL_OUTPUT_SHAPE_FILE)
