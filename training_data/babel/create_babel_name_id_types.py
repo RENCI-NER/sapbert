@@ -80,8 +80,7 @@ if __name__ == '__main__':
         if concatenate_all:
             # keep the count column since it is used later
             id_type_dfs.append(id_type_df)
-        id_type_df.drop(columns=['count']).to_csv(
-            os.path.join(output_path, f'{base_f}_id_types.csv'), index=False)
+        id_type_df.to_csv(os.path.join(output_path, f'{base_f}_id_types.csv'), index=False)
         name_id_df = df.groupby(['name', 'id']).size().reset_index().rename(columns={0: 'count'})
         name_id_df = name_id_df.drop(columns=['count'])
         if concatenate_all:
