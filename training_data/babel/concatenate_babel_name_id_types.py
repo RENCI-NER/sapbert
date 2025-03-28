@@ -42,4 +42,4 @@ if __name__ == '__main__':
         id_type_df['type'] = id_type_df['type'].str.strip()
         id_type_dfs.append(id_type_df)
 
-    concatenate_all_for_mapping(name_id_dfs, id_type_dfs)
+    concatenate_all_for_mapping(name_id_dfs, id_type_dfs, input_file_dir)

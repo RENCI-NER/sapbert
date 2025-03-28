@@ -4,7 +4,7 @@ import argparse
 import numpy as np
 
 
-def concatenate_all_for_mapping(name_ids, id_types):
+def concatenate_all_for_mapping(name_ids, id_types, out_dir):
     # Concatenate and aggregate ID-type mappings
     concat_id_type_df = pd.concat(id_types).groupby(['id', 'type'])['count'].sum().reset_index()
 
@@ -24,7 +24,7 @@ def concatenate_all_for_mapping(name_ids, id_types):
         exception_df = non_organism_df[non_organism_df['id'].isin(exception_ids)]
         print("Warning: Found IDs with multiple non-biolink:OrganismTaxon types (rule violation):")
         print(exception_df[['id', 'type', 'count']].to_string(index=False))
-        exception_df.to_csv(os.path.join(output_path, 'id_type_exceptions.csv'), index=False)
+        exception_df.to_csv(os.path.join(out_dir, 'id_type_exceptions.csv'), index=False)
 
     # keeping only non-biolink:OrganismTaxon types for IDs with 2 types
     resolved_multi_df = non_organism_df.groupby('id').agg({'type': 'first'}).reset_index()
@@ -42,7 +42,7 @@ def concatenate_all_for_mapping(name_ids, id_types):
     final_df = merged_df.groupby('name').agg({'id': list, 'type': list}).reset_index()
 
     # Save the final mapping
-    final_df.to_csv(os.path.join(output_path, 'name_id_type_mapping.csv'), index=False)
+    final_df.to_csv(os.path.join(out_dir, 'name_id_type_mapping.csv'), index=False)
 
 
 if __name__ == '__main__':
@@ -93,4 +93,4 @@ if __name__ == '__main__':
         print("No unique types found (no files processed)", flush=True)
 
     if concatenate_all:
-        concatenate_all_for_mapping(name_id_dfs, id_type_dfs)
+        concatenate_all_for_mapping(name_id_dfs, id_type_dfs, output_path)
