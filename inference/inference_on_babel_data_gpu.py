@@ -11,17 +11,18 @@ from utils import sapbert_predict
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
-    parser.add_argument('--INPUT_FILE_PATH', type=str, default='/babeldata/updated_mapping_gene/name_ids.csv',
+    parser.add_argument('--INPUT_FILE_PATH', type=str,
+                        default='/babeldata/mapping_other_2025jan23/name_id_type_mapping.csv',
                         help='babel terms and ids')
     parser.add_argument('--MODEL_FOLDER', type=str, default='/data/SapBERT-fine-tuned-babel',
                         help='SapBERT model trained from babel data')
     parser.add_argument('--CHUNK_SIZE', type=int, default=1000000,
                         help='chunk size to stream read csv input file. Set it to 0 to disable stream read')
-    parser.add_argument('--BABEL_OUTPUT_FILE', type=str, default='/babeldata2/updated_mapping_gene/'
-                                                                 'babel_prediction_output',
+    parser.add_argument('--BABEL_OUTPUT_FILE', type=str,
+                        default='/babeldata2/mapping_other_2025jan23/embedding/babel_prediction_output',
                         help='SapBERT model inference output file for babel input file')
-    parser.add_argument('--BABEL_OUTPUT_SHAPE_FILE', type=str, default='/babeldata2/updated_mapping_gene/'
-                                                                       'babel_prediction_output_shape.txt',
+    parser.add_argument('--BABEL_OUTPUT_SHAPE_FILE', type=str,
+                        default='/babeldata2/mapping_other_2025jan23/embedding/babel_prediction_output_shape.txt',
                         help='SapBERT model inference output shape file for babel input file')
 
     args = parser.parse_args()
@@ -41,14 +42,17 @@ if __name__ == '__main__':
     # make sure BABEL_OUTPUT_SHAPE_FILE path exists
     output_dir = os.path.dirname(BABEL_OUTPUT_SHAPE_FILE)
     os.makedirs(output_dir, exist_ok=True)
+    metadata_dir = os.path.join(os.path.dirname(output_dir), 'metadata')
+    os.makedirs(metadata_dir, exist_ok=True)
 
     if CHUNK_SIZE > 0:
         idx = 0
         shape_base, shape_ext = os.path.splitext(BABEL_OUTPUT_SHAPE_FILE)
-        meta_base, meta_ext = os.path.splitext(INPUT_FILE_PATH)
-        for df in pd.read_csv(INPUT_FILE_PATH, dtype=str, usecols=['Name'], chunksize=CHUNK_SIZE):
+        meta_base, meta_ext = os.path.splitext(os.path.basename(INPUT_FILE_PATH))
+        meta_base = os.path.join(metadata_dir, meta_base)
+        for df in pd.read_csv(INPUT_FILE_PATH, dtype=str, chunksize=CHUNK_SIZE):
             df.to_csv(f'{meta_base}_{idx}{meta_ext}', index=False)
-            all_names = df.Name.tolist()
+            all_names = df.name.tolist()
             start = time.time()
             _, _, all_reps_emb = sapbert_predict(MODEL_FOLDER, all_names)
             end = time.time()
@@ -67,7 +71,7 @@ if __name__ == '__main__':
             idx += 1
     else:
         df = pd.read_csv(INPUT_FILE_PATH, dtype=str, usecols=['Name'])
-        all_names = df.Name.tolist()
+        all_names = df.name.tolist()
         start = time.time()
         _, _, all_reps_emb = sapbert_predict(MODEL_FOLDER, all_names)
         end = time.time()
