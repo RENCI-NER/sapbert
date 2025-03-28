@@ -4,11 +4,45 @@ import argparse
 import numpy as np
 
 
-def map_ids_to_types(id_list, df_id_types):
-    ids_to_types = {}
-    for id in id_list:
-        ids_to_types[id] = sum(df_id_types[df_id_types.id==id]['type'].tolist(), [])
-    return ids_to_types
+def concatenate_all_for_mapping(name_ids, id_types):
+    # Concatenate and aggregate ID-type mappings
+    concat_id_type_df = pd.concat(id_types).groupby(['id', 'type'])['count'].sum().reset_index()
+
+    # Filter out biolink:OrganismTaxon where it co-occurs with another type
+    id_counts = concat_id_type_df.groupby('id').size()
+    ids_with_multiple_types = id_counts[id_counts > 1].index
+    multi_type_df = concat_id_type_df[concat_id_type_df['id'].isin(ids_with_multiple_types)]
+    single_type_df = concat_id_type_df[~concat_id_type_df['id'].isin(ids_with_multiple_types)]
+
+    # Separate cases where biolink:OrganismTaxon is one of the types
+    organism_taxon_df = multi_type_df[multi_type_df['type'] == 'biolink:OrganismTaxon']
+    non_organism_df = multi_type_df[multi_type_df['type'] != 'biolink:OrganismTaxon']
+
+    non_organism_counts = non_organism_df.groupby('id').size()
+    exception_ids = non_organism_counts[non_organism_counts > 1].index
+    if not exception_ids.empty:
+        exception_df = non_organism_df[non_organism_df['id'].isin(exception_ids)]
+        print("Warning: Found IDs with multiple non-biolink:OrganismTaxon types (rule violation):")
+        print(exception_df[['id', 'type', 'count']].to_string(index=False))
+        exception_df.to_csv(os.path.join(output_path, 'id_type_exceptions.csv'), index=False)
+
+    # keeping only non-biolink:OrganismTaxon types for IDs with 2 types
+    resolved_multi_df = non_organism_df.groupby('id').agg({'type': 'first'}).reset_index()
+
+    # Combine resolved multi-type IDs with single-type IDs
+    resolved_id_type_df = pd.concat([single_type_df[['id', 'type']], resolved_multi_df]).drop_duplicates()
+
+    # Merge with name-ID mapping
+    concat_name_id_df = pd.concat(name_ids).drop_duplicates()
+    merged_df = pd.merge(concat_name_id_df, resolved_id_type_df, on='id', how='left')
+    print(f'before dropna(), merged_df.shape: {merged_df.shape}')
+    merged_df = merged_df[['name', 'id', 'type']].dropna()  # Drop rows where type is missing
+    print(f'after dropna(), merged_df.shape: {merged_df.shape}')
+    # Pivot to create name-to-id-to-type mapping with lists
+    final_df = merged_df.groupby('name').agg({'id': list, 'type': list}).reset_index()
+
+    # Save the final mapping
+    final_df.to_csv(os.path.join(output_path, 'name_id_type_mapping.csv'), index=False)
 
 
 if __name__ == '__main__':
@@ -60,44 +94,4 @@ if __name__ == '__main__':
         print("No unique types found (no files processed)", flush=True)
 
     if concatenate_all:
-        # Concatenate and aggregate ID-type mappings
-        concat_id_type_df = pd.concat(id_type_dfs).groupby(['id', 'type'])['count'].sum().reset_index()
-
-        # Filter out biolink:OrganismTaxon where it co-occurs with another type
-        id_counts = concat_id_type_df.groupby('id').size()
-        ids_with_multiple_types = id_counts[id_counts > 1].index
-        multi_type_df = concat_id_type_df[concat_id_type_df['id'].isin(ids_with_multiple_types)]
-        single_type_df = concat_id_type_df[~concat_id_type_df['id'].isin(ids_with_multiple_types)]
-
-        # Separate cases where biolink:OrganismTaxon is one of the types
-        organism_taxon_df = multi_type_df[multi_type_df['type'] == 'biolink:OrganismTaxon']
-        non_organism_df = multi_type_df[multi_type_df['type'] != 'biolink:OrganismTaxon']
-
-        non_organism_counts = non_organism_df.groupby('id').size()
-        exception_ids = non_organism_counts[non_organism_counts > 1].index
-        if not exception_ids.empty:
-            exception_df = non_organism_df[non_organism_df['id'].isin(exception_ids)]
-            print("Warning: Found IDs with multiple non-biolink:OrganismTaxon types (rule violation):")
-            print(exception_df[['id', 'type', 'count']].to_string(index=False))
-            exception_df.to_csv(os.path.join(output_path, 'id_type_exceptions.csv'), index=False)
-
-        # keeping only non-biolink:OrganismTaxon types for IDs with 2 types
-        resolved_multi_df = non_organism_df.groupby('id').agg({'type': 'first'}).reset_index()
-
-        # Combine resolved multi-type IDs with single-type IDs
-        resolved_id_type_df = pd.concat([single_type_df[['id', 'type']], resolved_multi_df]).drop_duplicates()
-
-        # Merge with name-ID mapping
-        concat_name_id_df = pd.concat(name_id_dfs).drop_duplicates()
-        merged_df = pd.merge(concat_name_id_df, resolved_id_type_df, on='id', how='left')
-        print(f'before dropna(), merged_df.shape: {merged_df.shape}')
-        merged_df = merged_df[['name', 'id', 'type']].dropna()  # Drop rows where type is missing
-        print(f'after dropna(), merged_df.shape: {merged_df.shape}')
-        # Pivot to create name-to-id-to-type mapping with lists
-        final_df = merged_df.groupby('name').agg({'id': list, 'type': list}).reset_index()
-
-        # Save the final mapping
-        final_df.to_csv(os.path.join(output_path, 'name_id_type_mapping.csv'), index=False)
-
-        # save resolved ID-type mapping
-        resolved_id_type_df.to_csv(os.path.join(output_path, 'id_types_resolved.csv'), index=False)
+        concatenate_all_for_mapping(name_id_dfs, id_type_dfs)
