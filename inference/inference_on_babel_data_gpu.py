@@ -9,10 +9,19 @@ import re
 from utils import sapbert_predict
 
 
+def _get_all_names(input_df):
+    if 'Name' in input_df.columns:
+        return df.Name.tolist()
+    elif 'name' in input_df.columns:
+        return df.name.tolist()
+    else:
+        print(f'Name or name is not included in the input dataframe columns: {input_df.columns}')
+        return []
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process arguments.')
-    parser.add_argument('--INPUT_FILE_PATH', type=str,
-                        default='/babeldata/mapping_other_2025jan23/name_id_type_mapping.csv',
+    parser.add_argument('--INPUT_FILE_PATH', type=str, default='/babeldata/mapping_other_2025jan23/name_id_type_mapping.csv',
                         help='babel terms and ids')
     parser.add_argument('--MODEL_FOLDER', type=str, default='/data/SapBERT-fine-tuned-babel',
                         help='SapBERT model trained from babel data')
@@ -52,7 +61,7 @@ if __name__ == '__main__':
         meta_base = os.path.join(metadata_dir, meta_base)
         for df in pd.read_csv(INPUT_FILE_PATH, dtype=str, chunksize=CHUNK_SIZE):
             df.to_csv(f'{meta_base}_{idx}{meta_ext}', index=False)
-            all_names = df.name.tolist()
+            all_names = _get_all_names(df)
             start = time.time()
             _, _, all_reps_emb = sapbert_predict(MODEL_FOLDER, all_names)
             end = time.time()
@@ -70,8 +79,8 @@ if __name__ == '__main__':
                 print(f"{count} gc collected for chunk {idx}", flush=True)
             idx += 1
     else:
-        df = pd.read_csv(INPUT_FILE_PATH, dtype=str, usecols=['Name'])
-        all_names = df.name.tolist()
+        df = pd.read_csv(INPUT_FILE_PATH, dtype=str)
+        all_names = _get_all_names(df)
         start = time.time()
         _, _, all_reps_emb = sapbert_predict(MODEL_FOLDER, all_names)
         end = time.time()
