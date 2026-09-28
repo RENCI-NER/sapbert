@@ -5,7 +5,7 @@ This repository is a fork of [cambridgeltl/sapbert](https://github.com/cambridge
 | Model | Babel data release | Code release |
 |---|---|---|
 | [SapBERT-PubMedBERT-BabelSynonyms-v2025-01-23](https://huggingface.co/RenaissanceComputing/SapBERT-PubMedBERT-BabelSynonyms-v2025-01-23) | [Babel 2025-01-23](https://github.com/NCATSTranslator/Babel/tree/main/releases/2025jan23) | [`v1.0.0`](https://github.com/RENCI-NER/sapbert/releases/tag/v1.0.0) |
-| SapBERT-PubMedBERT-BabelSynonyms-v2026-07-22 (upcoming) | [Babel 2026-07-22](https://github.com/NCATSTranslator/Babel/tree/main/releases/2026jul22) | [`v1.0.0`](https://github.com/RENCI-NER/sapbert/releases/tag/v1.0.0) |
+| SapBERT-PubMedBERT-BabelSynonyms-v2026-07-22 (upcoming) | [Babel 2026-07-22](https://github.com/NCATSTranslator/Babel/tree/main/releases/2026jul22) | [`v1.0.1`](https://github.com/RENCI-NER/sapbert/releases/tag/v1.0.1) |
 
 ## Changes from upstream
 
