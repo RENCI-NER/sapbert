@@ -1,3 +1,34 @@
+# Babel SapBERT (RENCI fork of SapBERT)
+
+This repository is a fork of [cambridgeltl/sapbert](https://github.com/cambridgeltl/sapbert), adapted by [RENCI](https://renci.org/) to train and run inference with a SapBERT model on synonym data from [Babel](https://github.com/NCATSTranslator/Babel), the NCATS Biomedical Data Translator identifier-normalization resource. Trained models are available on Hugging Face at [RenaissanceComputing/babel-sapbert-models](https://huggingface.co/collections/RenaissanceComputing/babel-sapbert-models), with each SapBERT model versioned per Babel data release. The table below lists the Babel data release and code release used for each model.
+
+| Model | Babel data release | Code release |
+|---|---|---|
+| [SapBERT-PubMedBERT-BabelSynonyms-v2025-01-23](https://huggingface.co/RenaissanceComputing/SapBERT-PubMedBERT-BabelSynonyms-v2025-01-23) | [Babel 2025-01-23](https://github.com/NCATSTranslator/Babel/tree/main/releases/2025jan23) | [`v1.0.0`](https://github.com/RENCI-NER/sapbert/releases/tag/v1.0.0) |
+| SapBERT-PubMedBERT-BabelSynonyms-v2026-07-22 (upcoming) | [Babel 2026-07-22](https://github.com/NCATSTranslator/Babel/tree/main/releases/2026jul22) | [`v1.0.0`](https://github.com/RENCI-NER/sapbert/releases/tag/v1.0.0) |
+
+## Changes from upstream
+
+**Training data preparation** (`training_data/babel/`)
+- `create_training_data.py` converts Babel SapBERT training exports (Anatomy, Cell, Disease, Gene, Protein, DrugChemicalConflated, OrganismTaxon, and other Biolink categories) into SapBERT's `concept_id||name_1||name_2` format. It lowercases and strips names and drops pairs that are identical under case-insensitive comparison. The result is about 26 million synonym pairs for the Babel 2025-01-23 release.
+- `create_babel_name_id_types.py` and `concatenate_babel_name_id_types.py` build a single name → CURIE → Biolink type mapping, using canonical/preferred labels, to serve as the inference/lookup dictionary.
+
+**Training** (`train/`, `src/`)
+- The data loader reads a directory of training files and is optimized for memory use at this scale.
+- `train.py` has more robust error handling and supports loading custom base models.
+- `pretrain.sh` holds the configuration used to train the released models. It fine-tunes from `cambridgeltl/SapBERT-from-PubMedBERT-fulltext` for 1 epoch with batch size 256, learning rate 2e-5, max length 25, `ms_loss` with miner (margin 0.2), CLS aggregation, and AMP.
+
+**Inference** (`inference/`)
+- `inference_on_babel_data_gpu.py` streams the name-id-type mapping in chunks, generates embeddings on GPU, and writes chunked compressed `.npz` embedding files with matching metadata CSVs.
+- Additional scripts support PubMed/MeSH inference, CURIE normalization, prediction comparison, and splitting embedding files.
+
+**Environment**
+- A `Dockerfile` based on `nvcr.io/nvidia/nemo:22.01` is included, and `requirements.txt` is updated.
+
+Sections below the divider are the original upstream README and describe the original SapBERT models and workflow.
+
+---
+
 # SapBERT: Self-alignment pretraining for BERT
 
 **\[news | 22 Aug 2021\]** SapBERT is integrated into NVIDIA's deep learning toolkit NeMo as its [entity linking module](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/main/nlp/entity_linking.html) (thank you NVIDIA!). You can play with it in this [google colab](https://colab.research.google.com/github/NVIDIA/NeMo/blob/v1.0.2/tutorials/nlp/Entity_Linking_Medical.ipynb).
